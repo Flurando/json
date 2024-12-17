@@ -8,7 +8,47 @@
 
 (define encode
   (lambda (sth)
-    ()))
+    (cond
+     [(eq? sth #t) "true"]
+     [(eq? sth #f) "false"]
+     [(eq? sth '()) "nil"]
+     [(number? sth) (number->string sth)];this is not perfect because 3e5 would be translated to 300000.0 instead of 3e5
+     [(string? sth) (string-append "\"" sth "\"")]
+     [(alist? sth) (string-append
+		    "{"
+		    (let ((len (length sth)))
+		      (let loop ((i 0))
+			(if (>= i len)
+			    ""
+			    (string-append
+			     (encode (car (list-ref sth i)))
+			     ":"
+			     (encode (cdr (list-ref sth i)))
+			     (if (<= i (- len 2))
+				 ","
+				 "")
+			     (loop (1+ i))))))
+		    "}")]
+     [(or (list? sth) (vector? sth))
+      (let ((len (if (list? sth)
+		     (length sth)
+		     (vector-length sth))))
+	(if (zero? len)
+	    "[]"
+	    (string-append
+	     "["
+	     (let loop ((i 0))
+	       (if (>= i len)
+		   ""
+		   (string-append
+		    (encode (if (list? sth)
+				(list-ref sth i)
+				(vector-ref sth i)))
+		    (if (<= i (- len 2))
+			","
+			"")
+		    (loop (1+ i)))))
+	     "]")))])))
 
 ;;;object -> list or below
 ;;;array -> vector
@@ -55,3 +95,15 @@
 	        (display now op)))
 	  (set! last now)))
       (get-output-string op))))
+
+(define (alist? sth)
+  (and (list? sth)
+       (not (null? sth))
+       (let ((len (length sth)))
+	 (let loop ((i 0))
+	   (if (>= i len)
+	       #t
+	       (if (and (pair? (list-ref sth i))
+			(not (list? (list-ref sth i))))
+		   (loop (1+ i))
+		   #f))))))

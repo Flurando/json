@@ -1,0 +1,16 @@
+This is my implementation of JSON parser in guile scheme.
+
+Instead of using formal parser methods, I used the tactic of tweating and evaluating -- indeed dangerous but fun!
+
+So, avoid using this is real world JSON stuff.
+
+After my testing in the REPL, I find this encode and decode module quite robust, at least compared to my other projects.
+
+However, there are some known bugs, mainly they are:
+1. the "," after the last object in "[]" or "{}" would cause error even though this is permitted in JSON
+2. the double quotes must have a backslash right before them in order to be passed to decode and the output of encode have backslash
+3. "{}" is not supported by decode and is not producable using my encode even though this is valid JSON too
+
+Anyway, this is only intended to be used in safe environments and the only thing I can garentee is the decode and encode works well with pure guile scheme:)
+
+(You might complain: But scheme has quote and eval, who need JSON? Yep, that's why this is just a toy project to learn JSON instead of another high-end library)
